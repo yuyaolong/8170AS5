@@ -36,7 +36,7 @@ Vector3d bodyCenter(0,9,0);
 Vector3d vertexForce[8]={Vector3d(0,-1,0),Vector3d(0,0,0),Vector3d(0,0,0),Vector3d(0,0,0),
                         Vector3d(0,0,0),Vector3d(0,0,0),Vector3d(0,0,0),Vector3d(0,0,0)};
 
-vector<Vector3d> vertexPos;
+Vector3d vertexPos[VERTEXNUMBER];
 
 Vector3d Vpn(0,1,0);
 double Cr = 0.5;
@@ -125,15 +125,15 @@ void makeGrid()
 
 void rigidBodyInit()
 {
-    vertexPos.reserve(VERTEXNUMBER);
-    vertexPos.push_back(Vector3d(-HalfSIZE,-HalfSIZE,HalfSIZE)+bodyCenter);
-    vertexPos.push_back(Vector3d(HalfSIZE,-HalfSIZE,HalfSIZE)+bodyCenter);
-    vertexPos.push_back(Vector3d(HalfSIZE,-HalfSIZE,-HalfSIZE)+bodyCenter);
-    vertexPos.push_back(Vector3d(-HalfSIZE,-HalfSIZE,-HalfSIZE)+bodyCenter);
-    vertexPos.push_back(Vector3d(-HalfSIZE,HalfSIZE,HalfSIZE)+bodyCenter);
-    vertexPos.push_back(Vector3d(HalfSIZE,HalfSIZE,HalfSIZE)+bodyCenter);
-    vertexPos.push_back(Vector3d(HalfSIZE,HalfSIZE,-HalfSIZE)+bodyCenter);
-    vertexPos.push_back(Vector3d(-HalfSIZE,HalfSIZE,-HalfSIZE)+bodyCenter);
+    
+    vertexPos[0] = Vector3d(-HalfSIZE,-HalfSIZE,HalfSIZE)+bodyCenter;
+    vertexPos[1] = Vector3d(HalfSIZE,-HalfSIZE,HalfSIZE)+bodyCenter;
+    vertexPos[2] = Vector3d(HalfSIZE,-HalfSIZE,-HalfSIZE)+bodyCenter;
+    vertexPos[3] = Vector3d(-HalfSIZE,-HalfSIZE,-HalfSIZE)+bodyCenter;
+    vertexPos[4] = Vector3d(-HalfSIZE,HalfSIZE,HalfSIZE)+bodyCenter;
+    vertexPos[5] = Vector3d(HalfSIZE,HalfSIZE,HalfSIZE)+bodyCenter;
+    vertexPos[6] = Vector3d(HalfSIZE,HalfSIZE,-HalfSIZE)+bodyCenter;
+    vertexPos[7] = Vector3d(-HalfSIZE,HalfSIZE,-HalfSIZE)+bodyCenter;
     
     
     
