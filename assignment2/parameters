@@ -1,0 +1,5 @@
+ 100         130        0            60             0             40              0        -10       0           0.97                0.1                  50
+
+P0x,      P0y,       P0z,      xInitVelo,    yInitVelo,     zInitVelo,       accelX,    accelY,    accelZ     air-resistance        small-Step       running-Timer-interval
+
+range     -150~150         |    typical     |40| ~ |100|                |  typical |1| ~ |15|             | typical 0.90~0.99    | rang 0.05-0.15  |   typical 40-500ms
