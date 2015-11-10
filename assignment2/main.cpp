@@ -22,9 +22,9 @@
 
 #define ErrorThr 0.2
 
-bool RK4 = false;
+bool RK4 = true;
 
-float hStep = 0.01;
+
 
 Rigidstate GrigidState;
 RigidstateA GrigidStateA;
@@ -261,11 +261,11 @@ RigidstateA systemDynamicFuc( Rigidstate& rigidState)
 
 
 
-void statesNumInt(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidstate& rigidStateNew)
+void statesNumInt(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidstate& rigidStateNew, double h)
 {
     rigidStateA = systemDynamicFuc(rigidState);
     
-    rigidStateNew = rigidState + (rigidStateA * hStep);
+    rigidStateNew = rigidState + (rigidStateA * h);
     
     Vector3d bodyCenterNew = rigidStateNew.xposition;
     Matrix3x3 R = rigidStateNew.quater.rotation();
@@ -285,19 +285,19 @@ void statesNumInt(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidstate&
 }
 
 
-void statesNumIntRK4(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidstate& rigidStateNew)
+void statesNumIntRK4(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidstate& rigidStateNew, double h)
 {
     RigidstateA K1 = systemDynamicFuc(rigidState);
-    Rigidstate tmp1 = rigidState + K1*(hStep*0.5);
+    Rigidstate tmp1 = rigidState + K1*(h*0.5);
     
     RigidstateA K2 = systemDynamicFuc(tmp1);
-    Rigidstate tmp2 = rigidState + K2*(hStep*0.5);
+    Rigidstate tmp2 = rigidState + K2*(h*0.5);
     
     RigidstateA K3 = systemDynamicFuc(tmp2);
-    Rigidstate tmp3 = rigidState + K3*hStep;
+    Rigidstate tmp3 = rigidState + K3*h;
     
     RigidstateA K4 = systemDynamicFuc(tmp3);
-    rigidStateNew = rigidState + (K1 + (K2*2) + (K3*2) + K4)*(1.0/6)*(hStep);
+    rigidStateNew = rigidState + (K1 + (K2*2) + (K3*2) + K4)*(1.0/6)*(h);
     
     
     Vector3d bodyCenterNew = rigidStateNew.xposition;
@@ -316,7 +316,7 @@ void statesNumIntRK4(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidsta
 }
 
 
-void collisionDetect(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidstate& rigidStateNew)
+void collisionDetect(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidstate& rigidStateNew, double h)
 {
     for (int i=0; i<VERTEXNUMBER; i++) {
         if ((vertexPosNew[i].y-0)*(vertexPos[i].y-0)<0) {
@@ -348,11 +348,11 @@ void collisionDetect(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidsta
             rigidState.lamom = rigidState.lamom + r%J;
             
             if (RK4) {
-                statesNumIntRK4(rigidState, rigidStateA, rigidStateNew);
+                statesNumIntRK4(rigidState, rigidStateA, rigidStateNew, h);
             }
             else
             {
-                statesNumInt(rigidState, rigidStateA, rigidStateNew);
+                statesNumInt(rigidState, rigidStateA, rigidStateNew, h);
             }
         }
     }
@@ -361,17 +361,17 @@ void collisionDetect(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidsta
 
 void update()
 {
-    
+    double hStep = 0.01;
     
     if (RK4) {
-         statesNumIntRK4(GrigidState, GrigidStateA, GrigidStateNew);
+         statesNumIntRK4(GrigidState, GrigidStateA, GrigidStateNew, hStep);
     }
     else
     {
-        statesNumInt(GrigidState, GrigidStateA, GrigidStateNew);
+        statesNumInt(GrigidState, GrigidStateA, GrigidStateNew, hStep);
     }
-    collisionDetect(GrigidState, GrigidStateA, GrigidStateNew);
     
+    collisionDetect(GrigidState, GrigidStateA, GrigidStateNew, hStep);
     
     for (int i=0; i<VERTEXNUMBER; i++) {
         vertexForce[i] = Vector3d(0,0,0);
@@ -496,7 +496,7 @@ void init() {
 int main(int argc, char *argv[])
 {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowPosition(100, 100);
     glutInitWindowSize(WIDTH, HEIGHT);
     glutCreateWindow("Particle");
