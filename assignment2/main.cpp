@@ -43,7 +43,7 @@ Vector3d vertexPos[VERTEXNUMBER];
 Vector3d Vpn(0,1,0);
 double Cr = 0.5;
 
-Vector3d bodyForce(0,-0,0);
+Vector3d bodyForce(0,0,0);
 //Vector3d totalTorque(0,0,0);
 
 int WIDTH = 1000;
@@ -267,17 +267,17 @@ void statesNumInt(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidstate&
     
     rigidStateNew = rigidState + (rigidStateA * hStep);
     
-    bodyCenter = rigidStateNew.xposition;
+    Vector3d bodyCenterNew = rigidStateNew.xposition;
     Matrix3x3 R = rigidStateNew.quater.rotation();
     
-    vertexPosNew[0] = R*(Vector3d(-HalfSIZE,-HalfSIZE,HalfSIZE))+bodyCenter;
-    vertexPosNew[1] = R*(Vector3d(HalfSIZE,-HalfSIZE,HalfSIZE))+bodyCenter;
-    vertexPosNew[2] = R*(Vector3d(HalfSIZE,-HalfSIZE,-HalfSIZE))+bodyCenter;
-    vertexPosNew[3] = R*(Vector3d(-HalfSIZE,-HalfSIZE,-HalfSIZE))+bodyCenter;
-    vertexPosNew[4] = R*(Vector3d(-HalfSIZE,HalfSIZE,HalfSIZE))+bodyCenter;
-    vertexPosNew[5] = R*(Vector3d(HalfSIZE,HalfSIZE,HalfSIZE))+bodyCenter;
-    vertexPosNew[6] = R*(Vector3d(HalfSIZE,HalfSIZE,-HalfSIZE))+bodyCenter;
-    vertexPosNew[7] = R*(Vector3d(-HalfSIZE,HalfSIZE,-HalfSIZE))+bodyCenter;
+    vertexPosNew[0] = R*(Vector3d(-HalfSIZE,-HalfSIZE,HalfSIZE))+bodyCenterNew;
+    vertexPosNew[1] = R*(Vector3d(HalfSIZE,-HalfSIZE,HalfSIZE))+bodyCenterNew;
+    vertexPosNew[2] = R*(Vector3d(HalfSIZE,-HalfSIZE,-HalfSIZE))+bodyCenterNew;
+    vertexPosNew[3] = R*(Vector3d(-HalfSIZE,-HalfSIZE,-HalfSIZE))+bodyCenterNew;
+    vertexPosNew[4] = R*(Vector3d(-HalfSIZE,HalfSIZE,HalfSIZE))+bodyCenterNew;
+    vertexPosNew[5] = R*(Vector3d(HalfSIZE,HalfSIZE,HalfSIZE))+bodyCenterNew;
+    vertexPosNew[6] = R*(Vector3d(HalfSIZE,HalfSIZE,-HalfSIZE))+bodyCenterNew;
+    vertexPosNew[7] = R*(Vector3d(-HalfSIZE,HalfSIZE,-HalfSIZE))+bodyCenterNew;
     
     
     
@@ -297,21 +297,20 @@ void statesNumIntRK4(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidsta
     Rigidstate tmp3 = rigidState + K3*hStep;
     
     RigidstateA K4 = systemDynamicFuc(tmp3);
+    rigidStateNew = rigidState + (K1 + (K2*2) + (K3*2) + K4)*(1.0/6)*(hStep);
     
-    rigidStateNew = rigidState + (K1 + (K2*2) + (K3*2) + K4)*(hStep*1.0/6);
     
-    
-    bodyCenter = rigidStateNew.xposition;
+    Vector3d bodyCenterNew = rigidStateNew.xposition;
     Matrix3x3 R = rigidStateNew.quater.rotation();
     
-    vertexPosNew[0] = R*(Vector3d(-HalfSIZE,-HalfSIZE,HalfSIZE))+bodyCenter;
-    vertexPosNew[1] = R*(Vector3d(HalfSIZE,-HalfSIZE,HalfSIZE))+bodyCenter;
-    vertexPosNew[2] = R*(Vector3d(HalfSIZE,-HalfSIZE,-HalfSIZE))+bodyCenter;
-    vertexPosNew[3] = R*(Vector3d(-HalfSIZE,-HalfSIZE,-HalfSIZE))+bodyCenter;
-    vertexPosNew[4] = R*(Vector3d(-HalfSIZE,HalfSIZE,HalfSIZE))+bodyCenter;
-    vertexPosNew[5] = R*(Vector3d(HalfSIZE,HalfSIZE,HalfSIZE))+bodyCenter;
-    vertexPosNew[6] = R*(Vector3d(HalfSIZE,HalfSIZE,-HalfSIZE))+bodyCenter;
-    vertexPosNew[7] = R*(Vector3d(-HalfSIZE,HalfSIZE,-HalfSIZE))+bodyCenter;
+    vertexPosNew[0] = R*(Vector3d(-HalfSIZE,-HalfSIZE,HalfSIZE))+bodyCenterNew;
+    vertexPosNew[1] = R*(Vector3d(HalfSIZE,-HalfSIZE,HalfSIZE))+bodyCenterNew;
+    vertexPosNew[2] = R*(Vector3d(HalfSIZE,-HalfSIZE,-HalfSIZE))+bodyCenterNew;
+    vertexPosNew[3] = R*(Vector3d(-HalfSIZE,-HalfSIZE,-HalfSIZE))+bodyCenterNew;
+    vertexPosNew[4] = R*(Vector3d(-HalfSIZE,HalfSIZE,HalfSIZE))+bodyCenterNew;
+    vertexPosNew[5] = R*(Vector3d(HalfSIZE,HalfSIZE,HalfSIZE))+bodyCenterNew;
+    vertexPosNew[6] = R*(Vector3d(HalfSIZE,HalfSIZE,-HalfSIZE))+bodyCenterNew;
+    vertexPosNew[7] = R*(Vector3d(-HalfSIZE,HalfSIZE,-HalfSIZE))+bodyCenterNew;
     
     
 }
@@ -341,6 +340,7 @@ void collisionDetect(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidsta
             Matrix3x3 Iinverse = R * (Io.inv()) * (R.transpose());
             Vector3d w = Iinverse * rigidState.lamom;
             Vector3d r = vertexPos[i] - bodyCenter;
+            
             double Vn =  Vpn * (rigidStateA.velocity + w%r);
             double j = -1*(1+Cr)*Vn / ( 1.0/MASS + Vpn* (Iinverse*(r%Vpn)%r) );
             Vector3d J = j * Vpn;
@@ -377,76 +377,17 @@ void update()
         vertexForce[i] = Vector3d(0,0,0);
     }
 
-    
- 
-    /*
-    for (int i=0; i<VERTEXNUMBER; i++) {
-        if ((vertexPosNew[i].y-0)*(vertexPos[i].y-0)<0) {
-            
-            
-            if (rigidStateA.velocity.norm()< 0.1) {
-                for (int i=0; i<VERTEXNUMBER; i++) {
-                    vertexForce[i] = Vector3d(0,0,0);
-                    bodyForce = Vector3d(0,0,0);
-                }
-                rigidBodyInit();
-                resetSign =true;
-                
-                
-            }
-            
-            Vector3d r = vertexPos[i] - bodyCenter;
-            double Vn =  Vpn * (rigidStateA.velocity + w%r);
-            double j = -1*(1+Cr)*Vn / ( 1.0/MASS + Vpn* (Iinverse*(r%Vpn)%r) );
-            Vector3d J = j * Vpn;
-            rigidState.pfmom = rigidState.pfmom + J;
-            rigidState.lamom = rigidState.lamom + r%J;
-            
-            
-            
-            rigidStateA.velocity = (1.0/MASS)*rigidState.pfmom;
-            Matrix3x3 R = rigidState.quater.rotation();
-            Matrix3x3 Iinverse = R * (Io.inv()) * (R.transpose());
-            Vector3d w = Iinverse * rigidState.lamom;
-            
-            
-            rigidStateA.quaterA = 0.5 * w * rigidState.quater;
-            
-            Vector3d totalforce(0,0,0);
-            for (int i=0; i<VERTEXNUMBER; i++) {
-                totalforce = totalforce + vertexForce[i];
-            }
-            totalforce = totalforce + bodyForce;
-            
-            rigidStateA.force = totalforce ;
-            
-            Vector3d totalTorque(0,0,0);
-            Vector3d torques[8];
-            for (int i=0; i<VERTEXNUMBER; i++) {
-                torques[i] = (vertexPos[i] - bodyCenter) % vertexForce[i];
-                totalTorque = totalTorque + torques[i];
-            }
-            rigidStateA.torque = totalTorque;
-            
-            
-            rigidStateNew.xposition = rigidState.xposition + (rigidStateA.velocity * hStep);
-            Quaternion qNew = rigidState.quater + (rigidStateA.quaterA * hStep);
-            rigidStateNew.quater = qNew / (qNew.norm());
-            rigidStateNew.pfmom = rigidState.pfmom + (rigidStateA.force * hStep);
-            rigidStateNew.lamom = rigidState.lamom + (rigidStateA.torque * hStep);
-            
-        }
-    }
-    */
-    
     GrigidState.xposition = GrigidStateNew.xposition;
     GrigidState.quater = GrigidStateNew.quater;
     GrigidState.pfmom = GrigidStateNew.pfmom;
     GrigidState.lamom = GrigidStateNew.lamom;
     
+    
+    bodyCenter = GrigidState.xposition;
     for (int i=0; i<VERTEXNUMBER; i++) {
         vertexPos[i] = vertexPosNew[i];
     }
+    
     
     
 
