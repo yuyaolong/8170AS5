@@ -20,6 +20,8 @@ public:
     
     RigidstateA();
     
+    RigidstateA operator*(double h);
+    RigidstateA operator+(const RigidstateA a);
 };
 
 #endif /* rigidstateA_hpp */

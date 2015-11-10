@@ -11,6 +11,7 @@
 
 #include "Quaternion.h"
 #include "Vector.h"
+#include "rigidstateA.h"
 class Rigidstate {
 public:
     Vector3d xposition;
@@ -19,6 +20,10 @@ public:
     Vector3d lamom;
     
     Rigidstate();
+    
+    Rigidstate operator+(const Rigidstate);
+    
+    Rigidstate operator+(const RigidstateA);
     
 };
 

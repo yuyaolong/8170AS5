@@ -16,3 +16,30 @@ RigidstateA:: RigidstateA():velocity(Vector3d(0,0,0)),
     
     
 }
+
+
+RigidstateA RigidstateA::operator*(double h)
+{
+    RigidstateA stateDelt;
+    
+    stateDelt.velocity = this->velocity * h;
+    stateDelt.quaterA =  this->quaterA * h;
+    stateDelt.force = this->force*h;
+    stateDelt.torque = this->torque*h;
+
+    return stateDelt;
+}
+
+
+RigidstateA RigidstateA::operator+(const RigidstateA a)
+{
+    RigidstateA newA;
+    
+    newA.velocity = this->velocity + a.velocity;
+    newA.quaterA = this->quaterA + a.quaterA;
+    newA.force = this->force + a.force;
+    newA.torque = this->torque + a.torque;
+    return newA;
+    
+    
+}
