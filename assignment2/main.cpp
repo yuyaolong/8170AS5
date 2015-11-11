@@ -24,6 +24,7 @@
 
 bool RK4 = true;
 
+float wallY = 0;
 
 
 Rigidstate GrigidState;
@@ -35,16 +36,15 @@ Matrix3x3 Io(MASS*1.0/12*(SIZE*SIZE*2),0,0, 0,MASS*1.0/12*(SIZE*SIZE*2),0, 0,0,M
 #define VERTEXNUMBER 8
 Vector3d bodyCenter(0,9,0);
 
-Vector3d vertexForce[8]={Vector3d(0,-100,0),Vector3d(0,0,0),Vector3d(0,0,0),Vector3d(0,0,0),
-                        Vector3d(0,0,0),Vector3d(0,0,0),Vector3d(0,100,0),Vector3d(0,0,0)};
+Vector3d vertexForce[8]={Vector3d(0,0,0),Vector3d(0,100,0),Vector3d(0,0,0),Vector3d(0,0,0),
+                        Vector3d(0,0,0),Vector3d(0,0,0),Vector3d(0,0,0),Vector3d(0,-100,0)};
 
-Vector3d vertexPos[VERTEXNUMBER];
+
 
 Vector3d Vpn(0,1,0);
 double Cr = 0.5;
 
 Vector3d bodyForce(0,0,0);
-//Vector3d totalTorque(0,0,0);
 
 int WIDTH = 1000;
 int HEIGHT = 800;
@@ -55,6 +55,7 @@ bool  resetSign = false;
 
 bool  showGrid = true;
 
+Vector3d vertexPos[VERTEXNUMBER];
 Vector3d vertexPosNew[VERTEXNUMBER];
 
 
@@ -127,6 +128,7 @@ void makeGrid()
 
 void rigidBodyInit()
 {
+    bodyCenter = Vector3d(0,9,0);
     
     vertexPos[0] = Vector3d(-HalfSIZE,-HalfSIZE,HalfSIZE)+bodyCenter;
     vertexPos[1] = Vector3d(HalfSIZE,-HalfSIZE,HalfSIZE)+bodyCenter;
@@ -137,7 +139,9 @@ void rigidBodyInit()
     vertexPos[6] = Vector3d(HalfSIZE,HalfSIZE,-HalfSIZE)+bodyCenter;
     vertexPos[7] = Vector3d(-HalfSIZE,HalfSIZE,-HalfSIZE)+bodyCenter;
     
-    
+    for (int i=0; i<VERTEXNUMBER; i++) {
+        vertexPosNew[i] = vertexPos[i];
+    }
     
     Matrix3x3 m(1,0,0, 0,1,0, 0,0,1);
     GrigidState.xposition = bodyCenter;
@@ -151,7 +155,8 @@ void rigidBodyInit()
     GrigidStateA.force = Vector3d(0,0,0);
     GrigidStateA.torque = Vector3d(0,0,0);
     
-    
+    vertexForce[1].y = 100;
+    vertexForce[7].y = -100;
     
 }
 
@@ -279,8 +284,6 @@ void statesNumInt(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidstate&
     vertexPosNew[6] = R*(Vector3d(HalfSIZE,HalfSIZE,-HalfSIZE))+bodyCenterNew;
     vertexPosNew[7] = R*(Vector3d(-HalfSIZE,HalfSIZE,-HalfSIZE))+bodyCenterNew;
     
-    
-    
 
 }
 
@@ -297,8 +300,9 @@ void statesNumIntRK4(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidsta
     Rigidstate tmp3 = rigidState + K3*h;
     
     RigidstateA K4 = systemDynamicFuc(tmp3);
-    rigidStateNew = rigidState + (K1 + (K2*2) + (K3*2) + K4)*(1.0/6)*(h);
     
+    rigidStateA = (K1 + (K2*2) + (K3*2) + K4)*(1.0/6);
+    rigidStateNew = rigidState + rigidStateA*(h);
     
     Vector3d bodyCenterNew = rigidStateNew.xposition;
     Matrix3x3 R = rigidStateNew.quater.rotation();
@@ -318,11 +322,13 @@ void statesNumIntRK4(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidsta
 
 void collisionDetect(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidstate& rigidStateNew, double h)
 {
+    
     for (int i=0; i<VERTEXNUMBER; i++) {
-        if ((vertexPosNew[i].y-0)*(vertexPos[i].y-0)<0) {
-            
+        
+        if ((vertexPosNew[i].y-wallY)*(vertexPos[i].y-wallY)<0) {
             
             if (rigidStateA.velocity.norm()< ErrorThr) {
+                
                 unsigned int counter=0;
                 for (int i=0; i<VERTEXNUMBER; i++) {
                     if (vertexPosNew[i].y < ErrorThr) {
@@ -330,16 +336,28 @@ void collisionDetect(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidsta
                     }
                 }
                 if (counter > 3) {
-                   resetSign =true;
+                    resetSign =true;
+                    return;
                 }
                 
+            }
+            
+            
+            double s = (vertexPos[i].y-wallY)*1.0 / ( (vertexPos[i].y-wallY) + (wallY-vertexPosNew[i].y));
+            statesNumInt(rigidState, rigidStateA, rigidStateNew, s*h);
+            if (vertexPosNew[i].y >wallY) {
+                rigidState = rigidStateNew;
+                bodyCenter = rigidState.xposition;
+                for (int i=0; i<VERTEXNUMBER; i++) {
+                    vertexPos[i] = vertexPosNew[i];
+                }
             }
             
             
             Matrix3x3 R = rigidState.quater.rotation();
             Matrix3x3 Iinverse = R * (Io.inv()) * (R.transpose());
             Vector3d w = Iinverse * rigidState.lamom;
-            Vector3d r = vertexPos[i] - bodyCenter;
+            Vector3d r = vertexPosNew[i] - rigidState.xposition;
             
             double Vn =  Vpn * (rigidStateA.velocity + w%r);
             double j = -1*(1+Cr)*Vn / ( 1.0/MASS + Vpn* (Iinverse*(r%Vpn)%r) );
@@ -347,13 +365,74 @@ void collisionDetect(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidsta
             rigidState.pfmom = rigidState.pfmom + J;
             rigidState.lamom = rigidState.lamom + r%J;
             
-            if (RK4) {
-                statesNumIntRK4(rigidState, rigidStateA, rigidStateNew, h);
+            statesNumInt(rigidState, rigidStateA, rigidStateNew, h);
+            
+        }
+    }
+}
+
+
+
+void collisionDetectRK4(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigidstate& rigidStateNew, double h)
+{
+    
+    for (int i=0; i<VERTEXNUMBER; i++) {
+        if ((vertexPosNew[i].y-wallY)*(vertexPos[i].y-wallY)<0) {
+        
+            if ((vertexPosNew[i] - vertexPos[i]).norm() > 0.01) {
+                while (1)
+                {
+                    statesNumIntRK4(rigidState, rigidStateA, rigidStateNew, h*0.5);
+                    if (vertexPosNew[i].y <wallY) {
+                        break;
+                    }
+                    else
+                    {
+                        rigidState = rigidStateNew;
+                        bodyCenter = rigidState.xposition;
+                        for (int i=0; i<VERTEXNUMBER; i++) {
+                            vertexPos[i] = vertexPosNew[i];
+                        }
+                    }
+                }
+                collisionDetectRK4(rigidState, rigidStateA, rigidStateNew, h*0.5);
+
             }
             else
             {
-                statesNumInt(rigidState, rigidStateA, rigidStateNew, h);
+                //resting
+                unsigned int counter=0;
+                for (int i=0; i<VERTEXNUMBER; i++) {
+                    if (vertexPosNew[i].y < ErrorThr) {
+                        counter++;
+                    }
+                }
+                
+                if (counter > 3) {
+                    
+                    if (rigidStateA.velocity.norm()<  ErrorThr) {
+                        resetSign =true;
+                    }
+                    
+                }
+                
+                Matrix3x3 R = rigidState.quater.rotation();
+                Matrix3x3 Iinverse = R * (Io.inv()) * (R.transpose());
+                Vector3d w = Iinverse * rigidState.lamom;
+                Vector3d r = vertexPos[i] - bodyCenter;
+                
+                double Vn =  Vpn * (rigidStateA.velocity + w%r);
+                double j = -1*(1+Cr)*Vn / ( 1.0/MASS + Vpn* (Iinverse*(r%Vpn)%r) );
+                Vector3d J = j * Vpn;
+                
+                
+                rigidState.pfmom = rigidState.pfmom + J;
+                rigidState.lamom = rigidState.lamom + r%J;
+                
+                statesNumIntRK4(rigidState, rigidStateA, rigidStateNew, h);
             }
+            
+            
         }
     }
 }
@@ -365,24 +444,19 @@ void update()
     
     if (RK4) {
          statesNumIntRK4(GrigidState, GrigidStateA, GrigidStateNew, hStep);
+         collisionDetectRK4(GrigidState, GrigidStateA, GrigidStateNew, hStep);
     }
     else
     {
         statesNumInt(GrigidState, GrigidStateA, GrigidStateNew, hStep);
+        collisionDetect(GrigidState, GrigidStateA, GrigidStateNew, hStep);
     }
-    
-    collisionDetect(GrigidState, GrigidStateA, GrigidStateNew, hStep);
     
     for (int i=0; i<VERTEXNUMBER; i++) {
         vertexForce[i] = Vector3d(0,0,0);
     }
 
-    GrigidState.xposition = GrigidStateNew.xposition;
-    GrigidState.quater = GrigidStateNew.quater;
-    GrigidState.pfmom = GrigidStateNew.pfmom;
-    GrigidState.lamom = GrigidStateNew.lamom;
-    
-    
+    GrigidState = GrigidStateNew;
     bodyCenter = GrigidState.xposition;
     for (int i=0; i<VERTEXNUMBER; i++) {
         vertexPos[i] = vertexPosNew[i];
@@ -430,7 +504,26 @@ void handleKey(unsigned char key, int x, int y){
         case 'K':
             bodyForce = Vector3d(0,-9,0);
             break;
-
+            
+        case 't':
+        case 'T':
+            
+            rigidBodyInit();
+            srand( (unsigned)time( NULL ) );
+            for (int i=0; i<VERTEXNUMBER; i++) {
+                vertexForce[i].x = (rand()%2? -1:1)*rand() %50;
+                vertexForce[i].y = (rand()%2? -1:1)*rand() %100;
+                vertexForce[i].z = (rand()%2? -1:1)*rand() %50;
+            }
+            bodyForce = Vector3d(0,-9,0);
+            resetSign = false;
+            break;
+            
+        case 'r':
+        case 'R':
+            rigidBodyInit();
+            bodyForce = Vector3d(0,0,0);
+            break;
             
         case 'q':       // q - quit
         case 'Q':

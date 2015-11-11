@@ -52,7 +52,6 @@
 		E1D1E6051BAA7E5000A55BEC /* Camera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Camera.h; sourceTree = "<group>"; };
 		E1D1E6061BAA7E5000A55BEC /* Matrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Matrix.cpp; sourceTree = "<group>"; };
 		E1D1E6071BAA7E5000A55BEC /* Matrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Matrix.h; sourceTree = "<group>"; };
-		E1D1E6081BAA7E5000A55BEC /* parameters */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = parameters; sourceTree = "<group>"; };
 		E1D1E6091BAA7E5000A55BEC /* Utility.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utility.cpp; sourceTree = "<group>"; };
 		E1D1E60A1BAA7E5000A55BEC /* Utility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utility.h; sourceTree = "<group>"; };
 		E1D1E60B1BAA7E5000A55BEC /* Vector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Vector.cpp; sourceTree = "<group>"; };
@@ -108,7 +107,6 @@
 				E1D1E6051BAA7E5000A55BEC /* Camera.h */,
 				E1D1E6061BAA7E5000A55BEC /* Matrix.cpp */,
 				E1D1E6071BAA7E5000A55BEC /* Matrix.h */,
-				E1D1E6081BAA7E5000A55BEC /* parameters */,
 				E1D1E6091BAA7E5000A55BEC /* Utility.cpp */,
 				E1D1E60A1BAA7E5000A55BEC /* Utility.h */,
 				E1D1E60B1BAA7E5000A55BEC /* Vector.cpp */,
