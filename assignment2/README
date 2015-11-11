@@ -1,0 +1,13 @@
+This assignment I implement rotate and collison with plane.
+My program can change RK4 or Simple way.
+I also use professor's dichotomy way to detect collision
+
+Most situation it works fine, some specific angle will go through plane ~_~.
+
+Keys:
+
+A -- start;
+K -- fall down
+R -- reset
+C -- change simulation function RK4 - Simple
+T -- throw random 

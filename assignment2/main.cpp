@@ -43,7 +43,7 @@ Vector3d vertexForce[8]={Vector3d(0,0,0),Vector3d(0,100,0),Vector3d(0,0,0),Vecto
 
 Vector3d Vpn(0,1,0);
 double Cr = 0.5;
-
+double Ct = 0.9;
 Vector3d bodyForce(0,0,0);
 
 int WIDTH = 1000;
@@ -401,17 +401,22 @@ void collisionDetectRK4(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigid
             else
             {
                 //resting
-                unsigned int counter=0;
-                for (int i=0; i<VERTEXNUMBER; i++) {
-                    if (vertexPosNew[i].y < ErrorThr) {
-                        counter++;
-                    }
-                }
-                
-                if (counter > 3) {
+                if (rigidStateA.velocity.norm()< ErrorThr) {
                     
-                    if (rigidStateA.velocity.norm()<  ErrorThr) {
+                    unsigned int counter=0;
+                    for (int i=0; i<VERTEXNUMBER; i++) {
+//                        if (vertexPosNew[i].y<0.001) {
+//                            resetSign =true;
+//                            return;
+//                        }
+                        
+                        if (vertexPosNew[i].y < ErrorThr) {
+                            counter++;
+                        }
+                    }
+                    if (counter > 3) {
                         resetSign =true;
+                        return;
                     }
                     
                 }
@@ -426,8 +431,13 @@ void collisionDetectRK4(Rigidstate& rigidState,  RigidstateA& rigidStateA, Rigid
                 Vector3d J = j * Vpn;
                 
                 
-                rigidState.pfmom = rigidState.pfmom + J;
-                rigidState.lamom = rigidState.lamom + r%J;
+//                Vector3d VT = rigidStateA.velocity- Vn*Vpn;
+//                Vector3d Vtn = VT.normalize();
+//                double k = -1*Ct*(VT.norm()) / ( 1.0/MASS + Vtn* (Iinverse*(r%Vtn)%r) );
+//                Vector3d K = k*Vtn;
+                
+                rigidState.pfmom = rigidState.pfmom + J ;
+                rigidState.lamom = rigidState.lamom + r%J ;
                 
                 statesNumIntRK4(rigidState, rigidStateA, rigidStateNew, h);
             }
@@ -505,6 +515,21 @@ void handleKey(unsigned char key, int x, int y){
             bodyForce = Vector3d(0,-9,0);
             break;
             
+        case 'c':
+        case 'C':
+            RK4 = !RK4;
+            if (RK4) {
+                std::cout<<"Using RK4 now\n";
+            }
+            else
+            {
+                std::cout<<"Using simple way now\n";
+            }
+            rigidBodyInit();
+            bodyForce = Vector3d(0,0,0);
+            resetSign = true;
+            break;
+        
         case 't':
         case 'T':
             
@@ -523,6 +548,7 @@ void handleKey(unsigned char key, int x, int y){
         case 'R':
             rigidBodyInit();
             bodyForce = Vector3d(0,0,0);
+            glutTimerFunc(automaticSpeed, timeProc, 1);
             break;
             
         case 'q':       // q - quit
